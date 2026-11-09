@@ -6,4 +6,4 @@ USDA NASS production by state, ASD district and county: the first tab of the RMA
 
     streamlit run app.py
 
-Secret needed: `NASS_API_KEY` (Streamlit Cloud: Settings > Secrets). County boundaries come from a public URL; there is no database.
+NASS data comes from the shared cache that `usda-nass-etl` fills, so the app needs the Snowflake secrets (`USE_SNOWFLAKE`, `SNOWFLAKE_ACCOUNT`, `SNOWFLAKE_USER`, `SNOWFLAKE_PRIVATE_KEY`, `SNOWFLAKE_ROLE`, `SNOWFLAKE_WAREHOUSE`; Streamlit Cloud: Settings > Secrets). `NASS_API_KEY` is only a fallback while the cache fills: leave it out and the app reads the cache alone. County boundaries come from a public URL.
