@@ -2596,6 +2596,11 @@ _st_plotly_chart = st.plotly_chart  # saved before _chart shadows the call site
 def _chart(fig, **kw) -> None:
     _st_plotly_chart(fig, **kw)
 
+def _table(df=None, title="", **kw) -> None:
+    """The NASS tab's tables are drawn here, with their title, so a dashboard that hosts the tab (domestic-production-dashboard)
+    can replace this and hang Copy / PNG buttons, title included, on each one. On its own it is st.dataframe."""
+    st.dataframe(df, **kw)
+
 
 def main():
     _tls.ho_scope = False
@@ -3127,8 +3132,9 @@ def main():
                                     _wc_cls[["fips", "Value"]].rename(columns={"Value": "cls"}), on="fips", how="left")
                                 _wc_t["share"] = (_wc_t["cls"] / _wc_t["grp"].replace(0, np.nan) * 100).round(1)
                                 _wc_t = _wc_t.sort_values("cls", ascending=False)
-                                st.dataframe(
-                                    pd.DataFrame({
+                                _table(
+                                    title=f"Class mix by county: {_tls.wc}, {ABBR_TO_NAME.get(nass_state, nass_state)}",
+                                    df=pd.DataFrame({
                                         "County": _wc_t["County"],
                                         f"{'Winter' if _wc_g == 'WINTER' else 'Spring'} production (bu)": _wc_t["grp"].map(lambda v: f"{v:,.0f}"),
                                         f"{_tls.wc} (bu)": _wc_t["cls"].map(lambda v: f"{v:,.0f}"),
@@ -3235,8 +3241,9 @@ def main():
                                         f"{nass_year} {nass_lbl}</p>",
                                         unsafe_allow_html=True,
                                     )
-                                    st.dataframe(
+                                    _table(
                                         _dt[_tbl_cols],
+                                        title=f"{ABBR_TO_NAME.get(nass_state, nass_state)} {nass_year} {nass_lbl}: {nass_metric} by ASD district",
                                         use_container_width=True, hide_index=True,
                                     )
                                     if _n_est > 0:
@@ -3934,10 +3941,12 @@ def main():
                                 return ""
 
                             if nass_change != "Current Year":
-                                st.dataframe(_htbl_df.style.map(_htbl_style),
-                                             use_container_width=True)
+                                _table(_htbl_df.style.map(_htbl_style),
+                                       title=f"Historical summary: {_scope_label} ({nass_lbl})",
+                                       use_container_width=True)
                             else:
-                                st.dataframe(_htbl_df, use_container_width=True)
+                                _table(_htbl_df, title=f"Historical summary: {_scope_label} ({nass_lbl})",
+                                       use_container_width=True)
 
                             if _tbl_est_years:
                                 st.caption(
@@ -4011,7 +4020,9 @@ def main():
                                     prod_ctx[["County", "Production (bu)"]],
                                     on="County", how="left",
                                 )
-                            st.dataframe(show_tbl, use_container_width=True, hide_index=True)
+                            _table(show_tbl,
+                                   title=f"County data table: {ABBR_TO_NAME.get(nass_state, nass_state)} {nass_year} {nass_lbl} ({col_label})",
+                                   use_container_width=True, hide_index=True)
     st.markdown("<hr style='border-color:#3a3f47;margin-top:40px;margin-bottom:12px;'>", unsafe_allow_html=True)
     st.markdown(
         f"""<p style='color:#6b7280;font-size:0.72rem;line-height:1.55;text-align:center;
